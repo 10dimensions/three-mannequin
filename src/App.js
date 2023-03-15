@@ -1,10 +1,21 @@
 import "./styles.css";
+import React, { useEffect, useState } from "react";
+import * as THREE from "three";
+
+import { initializeScene } from "./scene"
 
 export default function App() {
+
+  const [render, setRender] = useState(false);
+
+  useEffect(()=>{
+    if(render) return;
+    initializeScene();
+    setRender(true);
+  }, []);
+  
   return (
-    <div className="App">
-      <h1>Hello CodeSandbox</h1>
-      <h2>Start editing to see some magic happen!</h2>
-    </div>
+    <div className="App" />
   );
 }
+
