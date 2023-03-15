@@ -24,7 +24,8 @@ export const initializeScene = () => {
     // var cube = new THREE.Mesh( geometry, material );
     // scene.add( cube );
 
-    camera.position.z = 5;
+    camera.position.y = 0.4;
+    camera.position.z = 0.2;
     controls.update();
 
     var animate = function () {
@@ -37,7 +38,25 @@ export const initializeScene = () => {
     animate();
 }
 
-export const glbLoader = (path) => {
+export const setupLights = () => {
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4))
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.4)
+    dirLight.position.set(- 60, 100, - 10);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 50;
+    dirLight.shadow.camera.bottom = - 50;
+    dirLight.shadow.camera.left = - 50;
+    dirLight.shadow.camera.right = 50;
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 200;
+    dirLight.shadow.mapSize.width = 4096;
+    dirLight.shadow.mapSize.height = 4096;
+    scene.add(dirLight);
+    // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
+}
+
+export const glbLoader = (path, scale = 1) => {
     // Instantiate a loader
     const loader = new GLTFLoader();
 
@@ -51,13 +70,13 @@ export const glbLoader = (path) => {
     // Load a glTF resource
     loader.load(
         // resource URL
-        './assets/environment/scene.glb',
+        path,
         // called when the resource is loaded
         function ( gltf ) {
 
             scene.add( gltf.scene );
 
-            console.log(scene);
+            gltf.scene.scale.set(scale, scale, scale);
 
             gltf.animations; // Array<THREE.AnimationClip>
             gltf.scene; // THREE.Group

@@ -2,7 +2,7 @@ import "./styles.css";
 import React, { useEffect, useState } from "react";
 import * as THREE from "three";
 
-import { initializeScene, glbLoader } from "./scene"
+import { initializeScene, setupLights, glbLoader } from "./scene"
 
 export default function App() {
 
@@ -11,7 +11,9 @@ export default function App() {
   useEffect(()=>{
     if(render) return;
     initializeScene();
-    glbLoader();
+    setupLights();
+    glbLoader('./assets/environment/scene.glb', 100);
+    glbLoader('./assets/props/mennequin.glb', 1);
     setRender(true);
   }, []);
   
