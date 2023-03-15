@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+import {keyDisplayQueue, clock, keysPressed, characterControls} from '../avatar';
 
 var scene;
 var camera;
@@ -34,11 +35,24 @@ export const initializeScene = () => {
     var animate = function () {
         requestAnimationFrame( animate );
         controls.update();
-        //cube.rotation.x += 0.01;
-        //cube.rotation.y += 0.01;
         renderer.render( scene, camera );
+
+        let mixerUpdateDelta = clock.getDelta();
+        if (characterControls) {
+            characterControls.update(mixerUpdateDelta, keysPressed);
+        }
     };
     animate();
+
+    // RESIZE HANDLER
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        keyDisplayQueue.updatePosition()
+    }
+
+    window.addEventListener('resize', onWindowResize);
 }
 
 export const setupLights = () => {
@@ -58,6 +72,43 @@ export const setupLights = () => {
     scene.add(dirLight);
     // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
 }
+
+export const generateFloor = () => {
+    // TEXTURES
+    const textureLoader = new THREE.TextureLoader();
+    const placeholder = textureLoader.load("./textures/placeholder/placeholder.png");
+    const sandBaseColor = textureLoader.load("./textures/sand/Sand 002_COLOR.jpg");
+    const sandNormalMap = textureLoader.load("./textures/sand/Sand 002_NRM.jpg");
+    const sandHeightMap = textureLoader.load("./textures/sand/Sand 002_DISP.jpg");
+    const sandAmbientOcclusion = textureLoader.load("./textures/sand/Sand 002_OCC.jpg");
+
+    const WIDTH = 80
+    const LENGTH = 80
+
+    const geometry = new THREE.PlaneGeometry(WIDTH, LENGTH, 512, 512);
+    const material = new THREE.MeshStandardMaterial(
+        {
+            map: sandBaseColor, normalMap: sandNormalMap,
+            displacementMap: sandHeightMap, displacementScale: 0.1,
+            aoMap: sandAmbientOcclusion
+        })
+    wrapAndRepeatTexture(material.map)
+    wrapAndRepeatTexture(material.normalMap)
+    wrapAndRepeatTexture(material.displacementMap)
+    wrapAndRepeatTexture(material.aoMap)
+    // const material = new THREE.MeshPhongMaterial({ map: placeholder})
+
+    const floor = new THREE.Mesh(geometry, material)
+    floor.receiveShadow = true
+    floor.rotation.x = - Math.PI / 2
+    scene.add(floor)
+}
+
+export const wrapAndRepeatTexture = (map) => {
+    map.wrapS = map.wrapT = THREE.RepeatWrapping
+    map.repeat.x = map.repeat.y = 10
+}
+
 
 export const glbLoader = (path, scale = 1) => {
     // Instantiate a loader
