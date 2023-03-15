@@ -11,22 +11,25 @@ var controls;
 export const initializeScene = () => {
     // === THREE.JS CODE START ===
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    renderer = new THREE.WebGLRenderer();
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true
+
+    camera.position.y = 0.2;
+    camera.position.z = 28;
 
     controls = new OrbitControls( camera, renderer.domElement );
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-
-    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    // var cube = new THREE.Mesh( geometry, material );
-    // scene.add( cube );
-
-    camera.position.y = 0.4;
-    camera.position.z = 0.2;
+    controls.enableDamping = true
+    controls.minDistance = 5
+    controls.maxDistance = 150
+    controls.enablePan = false
+    controls.maxPolarAngle = Math.PI / 2 - 0.05
     controls.update();
+
+    document.body.appendChild( renderer.domElement );
 
     var animate = function () {
         requestAnimationFrame( animate );
